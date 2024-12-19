@@ -18,7 +18,8 @@ function BUTTERIPSUM(count = 1, mode = "paragraph") {
   }
   
   // Call the Butter Ipsum API
-  const apiUrl = "https://butter-ipsum-generator.example.com/api/v1/generate" +
+  // Replace this URL with your deployed API endpoint
+  const apiUrl = ScriptApp.getService().getUrl().replace(/\/exec$/, "") + "/api/v1/generate" +
                 "?count=" + count +
                 "&mode=" + mode.toLowerCase();
   
