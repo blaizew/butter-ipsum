@@ -60,22 +60,35 @@ body {
 }
 
 .btn-generate {
-    padding: 1rem 2.5rem;
-    border-radius: 4px;
-    background: linear-gradient(145deg, #FFE07D, var(--butter-primary));
+    padding: 1.2rem 3rem;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #FFE7A3, var(--butter-primary));
     box-shadow: 
-        0 2px 4px rgba(230, 162, 60, 0.1),
-        0 8px 16px rgba(230, 162, 60, 0.1);
+        inset 0 -2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.4),
+        0 4px 8px rgba(230, 162, 60, 0.15);
     transform: perspective(1px) translateZ(0);
-    min-width: 200px;
+    min-width: 180px;
+    position: relative;
+    border: 2px solid #E6A23C;
+    transition: all 0.3s ease;
 }
 
 .btn-generate:hover {
-    transform: perspective(1px) translateZ(2px);
-    background: linear-gradient(145deg, var(--butter-primary), #FFE07D);
+    transform: translateY(-2px) perspective(1px) translateZ(0);
+    background: linear-gradient(145deg, var(--butter-primary), #FFE7A3);
     box-shadow: 
-        0 4px 8px rgba(230, 162, 60, 0.2),
-        0 12px 20px rgba(230, 162, 60, 0.1);
+        inset 0 -2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.5),
+        0 6px 12px rgba(230, 162, 60, 0.2);
+}
+
+.btn-generate:active {
+    transform: translateY(1px);
+    box-shadow: 
+        inset 0 -1px 2px rgba(255, 255, 255, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3),
+        0 2px 4px rgba(230, 162, 60, 0.1);
 }
 
 .btn-butter:hover {
