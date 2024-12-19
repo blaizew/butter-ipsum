@@ -56,7 +56,8 @@ body {
     overflow: hidden;
     display: inline-block;
     text-align: center;
-    min-width: 100px;
+    min-width: 120px;
+    margin: 0 auto;
 }
 
 .btn-generate {
