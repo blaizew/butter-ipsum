@@ -57,28 +57,7 @@
 }</code></pre>
         </div>
 
-        <div class="butter-card">
-            <h2>Google Sheets Integration</h2>
-            <p>Use Butter Ipsum directly in your Google Sheets with our custom function!</p>
-            
-            <h3>Setup Instructions</h3>
-            <ol>
-                <li>Open your Google Sheet</li>
-                <li>Go to Extensions > Apps Script</li>
-                <li>Create a new script file</li>
-                <li>Copy and paste our <a href="{{ url_for('static', filename='google-apps-script/butteripsum.gs') }}">Google Apps Script code</a></li>
-                <li>Save and return to your spreadsheet</li>
-            </ol>
-
-            <h3>Usage Examples</h3>
-            <pre class="api-example"><code>=BUTTERIPSUM(2, "paragraph")  // Generates 2 paragraphs
-=BUTTERIPSUM(3, "sentence")   // Generates 3 sentences
-=BUTTERIPSUM(5, "word")       // Generates 5 words</code></pre>
-
-            <div class="alert alert-info">
-                <strong>Note:</strong> The custom function respects the same rate limits as the API.
-            </div>
-        </div>
+        
 
         <div class="butter-card">
             <h2>Rate Limits</h2>
@@ -108,7 +87,7 @@
 
     <footer class="butter-footer">
         <div class="container">
-            <p>Return to <a href="/">Butter Ipsum Generator</a></p>
+            <p><a href="/">Butter Ipsum Generator</a> | <a href="/sheets">Google Sheets Integration</a></p>
             <p class="butter-ornament">✦ ❈ ✦</p>
             <p class="copyright">Churned with love © 2024</p>
         </div>

@@ -16,6 +16,10 @@ def index():
 @app.route('/api/docs')
 def api_docs():
     return render_template('api.html')
+@app.route('/sheets')
+def sheets_docs():
+    return render_template('google_sheets.html')
+
 
 @app.route('/generate', methods=['GET'])
 def generate_text():
