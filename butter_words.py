@@ -32,7 +32,7 @@ BUTTER_WORDS = {
         'crumbly', 'aromatic', 'silky', 'flaky', 'light', 'airy', 'heavenly',
         'delicate', 'creamy-smooth', 'golden-brown', 'sun-kissed', 'pure',
         'all-natural', 'handmade', 'dairy-rich', 'luscious', 'farm-fresh',
-        'spreadable', 'silken-soft', 'glossy', 'textured', 'laminated'
+        'spreadable', 'silken-soft', 'glossy', 'textured'
     ],
     'descriptions': [
         'with a rich yellow hue', 'at room temperature', 'from grass-fed cows',
@@ -155,5 +155,5 @@ SENTENCE_PATTERNS = [
     "Rich {adj} butter {verbs} on the top of the {nouns}.",
     "Golden butter {verbs} into the flaky {adj} {nouns}.",
     "Warm butter {verbs} through the soft {adj} {nouns}.",
-    "Golden butter {verbs} over the crust of the {adj} {nouns}.",
+    "Golden butter {verbs} over the crust of the {adj} {nouns}."
 ]
