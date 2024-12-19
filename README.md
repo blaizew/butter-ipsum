@@ -1,45 +1,18 @@
 # Butter Ipsum 🧈
 
-A deliciously smooth Lorem Ipsum generator that creates culinary-themed placeholder text. Perfect for food blogs, restaurant websites, and culinary applications.
+**A deliciously smooth Lorem Ipsum generator for butter lovers.** Generate butter-themed placeholder text perfect for food blogs, culinary applications, and creative projects.
 
 ## Features
 
-- 🔄 **Dynamic Text Generation**: Create paragraphs, sentences, or individual words of butter-themed placeholder text
-- 🌐 **RESTful API**: Integrate Butter Ipsum into your applications with our simple API
-- 📊 **Google Sheets Integration**: Use custom functions to generate text directly in your spreadsheets
-- ✨ **Contextual Generation**: Text generation that maintains food and culinary themes
-- 🎯 **Multiple Output Formats**: Generate single words, sentences, or complete paragraphs
-- 🔌 **Easy Integration**: Simple REST API with clear documentation
-
-## Live Demo
-
-Visit [Butter Ipsum Generator](https://butteripsum.com) to try it out!
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/blaizew/butter-ipsum.git
-cd butter-ipsum
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Run the application:
-```bash
-python main.py
-```
-
-The application will be available at `http://localhost:5000`.
+	- 🧈 **Dynamic Butter-Themed Outputs**: Generate buttery text in words, sentences, or paragraphs.
+	- 🔗 **REST API Integration**: Seamlessly integrate Butter Ipsum into your projects.
+	- 📊 **Google Sheets Integration**: Generate Butter Ipsum directly in your spreadsheets.
 
 ## Usage
 
 ### Web Interface
 
-Visit the homepage and use the simple form interface to generate text:
+Visit [Butter Ipsum Generator](https://butteripsum.com) and use the simple form interface to generate text:
 1. Select your desired output format (paragraphs, sentences, or words)
 2. Choose the number of units to generate
 3. Click "Generate" to create your butter-themed text
@@ -73,7 +46,7 @@ Built with:
 - Flask web framework
 - Python backend with spaCy NLP
 - Bootstrap for responsive design
-- Google Apps Script integration
+- Replit's AI Agent
 
 ## Contributing
 
