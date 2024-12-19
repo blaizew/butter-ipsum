@@ -171,6 +171,51 @@ body {
     font-style: italic;
 }
 
+.butter-footer {
+    background: var(--cream);
+    border-top: 2px solid var(--butter-primary);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    text-align: center;
+}
+
+.butter-footer a {
+    color: var(--butter-accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.butter-footer a:hover {
+    text-decoration: underline;
+}
+
+.butter-footer .copyright {
+    color: var(--butter-dark);
+    font-style: italic;
+    margin-top: 1rem;
+}
+
+.api-endpoint, .api-example {
+    background: var(--butter-secondary);
+    border: 2px solid var(--butter-primary);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.table {
+    margin: 1.5rem 0;
+}
+
+.table th {
+    color: var(--butter-dark);
+    border-bottom-color: var(--butter-primary);
+}
+
+.table td {
+    border-bottom-color: var(--butter-primary);
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 1rem;

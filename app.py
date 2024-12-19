@@ -13,6 +13,10 @@ text_generator = ButterTextGenerator()
 def index():
     return render_template('index.html')
 
+@app.route('/api/docs')
+def api_docs():
+    return render_template('api.html')
+
 @app.route('/generate', methods=['GET'])
 def generate_text():
     """Generate butter-themed text through web interface."""

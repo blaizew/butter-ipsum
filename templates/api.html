@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Butter Ipsum API - Documentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Butter Ipsum API</h1>
+            <p class="lead">Spread the buttery goodness programmatically</p>
+            <div class="butter-ornament">✦ ❈ ✦</div>
+        </div>
+
+        <div class="butter-card">
+            <h2>API Endpoint</h2>
+            <pre class="api-endpoint"><code>GET /api/v1/generate</code></pre>
+            
+            <h3>Query Parameters</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>count</td>
+                        <td>integer</td>
+                        <td>Number of units to generate (1-10)</td>
+                    </tr>
+                    <tr>
+                        <td>mode</td>
+                        <td>string</td>
+                        <td>Generation mode: 'paragraph', 'sentence', or 'word'</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Example Request</h3>
+            <pre class="api-example"><code>GET /api/v1/generate?count=2&mode=paragraph</code></pre>
+
+            <h3>Example Response</h3>
+            <pre class="api-example"><code>{
+    "text": "Golden butter melts into the fresh croissant...",
+    "metadata": {
+        "count": 2,
+        "mode": "paragraph",
+        "timestamp": "2024-12-19T06:48:13Z"
+    }
+}</code></pre>
+        </div>
+
+        <div class="butter-card">
+            <h2>Rate Limits</h2>
+            <p>To ensure smooth service for all users, please limit requests to 60 per minute.</p>
+            
+            <h2>Error Codes</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>400</td>
+                        <td>Invalid parameters (count out of range or invalid mode)</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>Server error</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="butter-footer">
+        <div class="container">
+            <p>Return to <a href="/">Butter Ipsum Generator</a></p>
+            <p class="butter-ornament">✦ ❈ ✦</p>
+            <p class="copyright">Churned with love © 2024</p>
+        </div>
+    </footer>
+</body>
+</html>
