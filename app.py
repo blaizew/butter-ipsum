@@ -26,10 +26,13 @@ def generate_text():
             return jsonify({'error': 'Invalid mode'}), 400
 
         if mode == 'paragraph':
+            logger.debug(f"Generating {count} paragraphs")
             text = text_generator.generate_paragraphs(count)
         elif mode == 'sentence':
+            logger.debug(f"Generating {count} sentences")
             text = text_generator.generate_sentences(count)
         else:
+            logger.debug(f"Generating {count} words")
             text = text_generator.generate_words(count)
 
         return jsonify({'text': text})

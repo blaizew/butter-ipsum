@@ -42,10 +42,15 @@ class ButterTextGenerator:
         return " ".join([self.generate_sentence() for _ in range(count)])
 
     def generate_paragraphs(self, count):
-        paragraphs = []
-        for _ in range(count):
-            # Generate 4-8 sentences per paragraph
-            num_sentences = random.randint(4, 8)
-            paragraph = self.generate_sentences(num_sentences)
-            paragraphs.append(paragraph)
-        return "\n\n".join(paragraphs)
+        try:
+            paragraphs = []
+            for _ in range(count):
+                # Generate 4-8 sentences per paragraph
+                num_sentences = random.randint(4, 8)
+                paragraph = self.generate_sentences(num_sentences)
+                paragraphs.append(paragraph)
+            logger.debug(f"Generated {count} paragraphs")
+            return "\n\n".join(paragraphs)
+        except Exception as e:
+            logger.error(f"Error generating paragraphs: {str(e)}")
+            return "Error generating paragraphs"
