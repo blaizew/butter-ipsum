@@ -1,0 +1,46 @@
+Updated PRD: Butter Ipsum
+
+Core Features
+
+	1.	Butter-Themed Lorem Ipsum Generator
+	•	Input Options:
+	•	Number of paragraphs, sentences, or words to generate.
+	•	Option to select “paragraph,” “sentence,” or “word” mode.
+	•	Output:
+	•	Filler text that incorporates butter-related themes (e.g., butter-making process, pastries, bread).
+	•	Sentences dynamically generated from a grammar engine (e.g., spaCy) combined with a curated pool of butter-related words and phrases.
+	•	Example sentences:
+	•	“Golden butter melts into the crevices of freshly baked sourdough.”
+	•	“Flaky brioche layers whisper of buttery indulgence with every bite.”
+	•	Non-repetitive, creative, and grammatically correct.
+
+Technical Requirements
+
+	1.	Sentence Generation
+	•	Use dynamic sentence construction:
+	•	Pool of words: Butter-related nouns, verbs, adjectives, and objects (e.g., “churn,” “golden,” “spread,” “croissant”).
+	•	Combine words into grammatically correct sentences using spaCy or a similar NLP library.
+	•	Randomized assembly to ensure creativity and variation.
+	•	Avoid predefined templates to minimize repetitiveness.
+	2.	Backend
+	•	Language: Python.
+	•	Framework: Flask for API and page rendering.
+	•	Libraries:
+	•	spaCy: For sentence structure and grammar correctness.
+	•	random for dynamic word selection.
+	•	Endpoint: /generate (GET) with parameters for count and mode (e.g., paragraph, sentence).
+	3.	Frontend
+	•	Framework: HTML, CSS, and JavaScript.
+	•	Design: Simple and buttery:
+	•	Buttery yellow color palette.
+	•	Smooth UI interactions.
+	•	Input Fields:
+	•	Dropdown or slider to set the number of words, sentences, or paragraphs.
+	•	“Generate Butter Ipsum” button.
+	•	Mobile-Friendly:
+	•	Responsive design using Bootstrap or CSS Grid/Flexbox.
+	4.	Usability
+	•	Simple UX for both desktop and mobile.
+	•	“Copy to Clipboard” functionality for generated text.
+
+This updated PRD emphasizes simplicity while maintaining creativity, ensuring that Butter Ipsum is both fun and functional. Let me know if you’d like a Python implementation to align with this approach!
