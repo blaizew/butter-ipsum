@@ -10,12 +10,12 @@ class ButterTextGenerator:
         pattern = random.choice(self.patterns)
         sentence = pattern.format(
             adj=random.choice(self.words['adjectives']),
-            noun=random.choice(self.words['nouns']),
-            verb=random.choice(self.words['verbs']),
-            adv=random.choice(self.words['adverbs'])
+            nouns=random.choice(self.words['nouns']),
+            verbs=random.choice(self.words['verbs']),
+            descriptions=random.choice(self.words['descriptions'])
         )
-        # Capitalize first letter and add period
-        return sentence[0].upper() + sentence[1:] + "."
+        # Ensure proper capitalization
+        return sentence[0].upper() + sentence[1:]
 
     def generate_words(self, count):
         words = []
