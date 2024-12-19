@@ -1,21 +1,34 @@
 import random
+import logging
 from butter_words import BUTTER_WORDS, SENTENCE_PATTERNS
+
+logger = logging.getLogger(__name__)
 
 class ButterTextGenerator:
     def __init__(self):
         self.words = BUTTER_WORDS
         self.patterns = SENTENCE_PATTERNS
+        logger.debug(f"Initialized ButterTextGenerator with {len(self.patterns)} patterns")
 
     def generate_sentence(self):
-        pattern = random.choice(self.patterns)
-        sentence = pattern.format(
-            adj=random.choice(self.words['adjectives']),
-            nouns=random.choice(self.words['nouns']),
-            verbs=random.choice(self.words['verbs']),
-            descriptions=random.choice(self.words['descriptions'])
-        )
-        # Ensure proper capitalization
-        return sentence[0].upper() + sentence[1:]
+        try:
+            pattern = random.choice(self.patterns)
+            logger.debug(f"Selected pattern: {pattern}")
+            
+            sentence = pattern.format(
+                adj=random.choice(self.words['adjectives']),
+                nouns=random.choice(self.words['nouns']),
+                verbs=random.choice(self.words['verbs']),
+                descriptions=random.choice(self.words['descriptions'])
+            )
+            # Ensure proper capitalization
+            return sentence[0].upper() + sentence[1:]
+        except KeyError as e:
+            logger.error(f"Missing word category: {str(e)}")
+            return "Error generating sentence: missing word category"
+        except Exception as e:
+            logger.error(f"Error generating sentence: {str(e)}")
+            return "Error generating sentence"
 
     def generate_words(self, count):
         words = []
