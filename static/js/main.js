@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            outputDiv.textContent = data.text;
+            // Convert newlines to <br> tags and set as HTML
+            outputDiv.innerHTML = data.text.replace(/\n/g, '<br><br>');
             copyButton.style.display = 'block';
         } catch (error) {
             showToast('Failed to generate text. Please try again.');

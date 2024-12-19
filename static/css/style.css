@@ -77,9 +77,17 @@ body {
     background-color: white;
     border: 2px solid var(--butter-primary);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 1.5rem;
     min-height: 200px;
     margin-top: 1rem;
+    line-height: 1.8;
+    white-space: pre-line;
+}
+
+#output br {
+    display: block;
+    margin: 1em 0;
+    content: "";
 }
 
 .header {
