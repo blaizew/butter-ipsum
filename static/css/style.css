@@ -172,6 +172,28 @@ body {
 }
 
 .butter-footer {
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-links .separator {
+    color: var(--butter-accent);
+    margin: 0 0.5rem;
+}
+
+.footer-links a {
+    color: var(--butter-accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
     background: var(--cream);
     border-top: 2px solid var(--butter-primary);
     padding: 2rem 0;
