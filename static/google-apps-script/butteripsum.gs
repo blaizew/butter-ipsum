@@ -18,21 +18,36 @@ function BUTTERIPSUM(count = 1, mode = "paragraph") {
   }
   
   // Call the Butter Ipsum API
-  // Replace this URL with your deployed API endpoint
-  const apiUrl = ScriptApp.getService().getUrl().replace(/\/exec$/, "") + "/api/v1/generate" +
-                "?count=" + count +
-                "&mode=" + mode.toLowerCase();
+  const apiUrl = "https://butteripsum.com/api/v1/generate" +
+                "?count=" + encodeURIComponent(count) +
+                "&mode=" + encodeURIComponent(mode.toLowerCase());
   
   try {
-    const response = UrlFetchApp.fetch(apiUrl);
-    const data = JSON.parse(response.getContentText());
+    const response = UrlFetchApp.fetch(apiUrl, {
+      muteHttpExceptions: true,
+      timeout: 30
+    });
     
+    const responseCode = response.getResponseCode();
+    if (responseCode !== 200) {
+      throw new Error(`HTTP Error ${responseCode}: Failed to fetch text from API`);
+    }
+    
+    const data = JSON.parse(response.getContentText());
     if (data.error) {
-      throw new Error(data.message || "Failed to generate text");
+      throw new Error(data.message || "API returned an error");
+    }
+    
+    if (!data.text) {
+      throw new Error("API response missing text content");
     }
     
     return data.text;
   } catch (error) {
+    // Handle specific error types
+    if (error.message.includes("Invalid JSON")) {
+      throw new Error("Invalid API response format");
+    }
     throw new Error("Failed to generate text: " + error.message);
   }
 }
