@@ -304,4 +304,23 @@ body {
     .butter-card {
         padding: 1rem;
     }
+
+    .tuning-grid {
+        gap: 0.5rem;
+    }
+
+    .tuning-row {
+        grid-template-columns: minmax(80px, 1fr) 1.5fr;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tuning-row {
+        grid-template-columns: minmax(70px, 1fr) 1.2fr;
+    }
 }
