@@ -1,7 +1,6 @@
 import random
 import logging
 import os
-import time
 from openai import OpenAI
 from butter_words import BUTTER_WORDS, SENTENCE_PATTERNS
 from gpt_prompts import create_system_prompt, create_user_prompt, DEFAULT_TUNING_PARAMS
@@ -29,29 +28,14 @@ class ButterTextGenerator:
                 logger.debug("Attempting to initialize OpenAI client...")
                 self.openai_client = OpenAI(api_key=api_key)
                 
-                # Skip initial validation if we're in a rate-limited state
-                if hasattr(self.__class__, '_rate_limited_until') and \
-                   self.__class__._rate_limited_until > time.time():
-                    logger.warning("Skipping initial validation due to rate limiting")
-                    return
-                
                 # Validate API key with a minimal request
-                try:
-                    response = self.openai_client.chat.completions.create(
-                        model=self.model,
-                        messages=[{"role": "user", "content": "test"}],
-                        max_tokens=1
-                    )
-                    if response:
-                        logger.info("OpenAI client successfully initialized and tested")
-                except Exception as e:
-                    if "rate_limit" in str(e).lower() or "429" in str(e):
-                        # Set a class-level rate limit timeout (5 minutes)
-                        self.__class__._rate_limited_until = time.time() + 300
-                        logger.warning("Rate limited. Will retry after 5 minutes.")
-                        self.use_gpt = False
-                        return
-                    raise  # Re-raise other exceptions
+                response = self.openai_client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "user", "content": "test"}],
+                    max_tokens=1
+                )
+                if response:
+                    logger.info("OpenAI client successfully initialized and tested")
                 
             except ValueError as ve:
                 logger.error(str(ve))
@@ -62,10 +46,8 @@ class ButterTextGenerator:
                     logger.error("Invalid OpenAI API key provided")
                 elif "insufficient_quota" in error_msg.lower():
                     logger.error("OpenAI API quota exceeded")
-                elif "rate_limit" in error_msg.lower() or "429" in error_msg:
-                    # Set a class-level rate limit timeout (5 minutes)
-                    self.__class__._rate_limited_until = time.time() + 300
-                    logger.warning("Rate limited. Will retry after 5 minutes.")
+                elif "rate_limit" in error_msg.lower():
+                    logger.error("OpenAI API rate limit exceeded")
                 else:
                     logger.error(f"Error initializing OpenAI client: {error_msg}")
                 self.use_gpt = False
@@ -80,16 +62,6 @@ class ButterTextGenerator:
         if not self.openai_client:
             logger.warning("OpenAI client not initialized, falling back to basic generation")
             return None
-
-        # Check if we're currently rate limited
-        if hasattr(self.__class__, '_rate_limited_until'):
-            if time.time() < self.__class__._rate_limited_until:
-                remaining_time = int(self.__class__._rate_limited_until - time.time())
-                logger.warning(f"Rate limit cooldown: {remaining_time} seconds remaining")
-                return None
-            else:
-                # Reset rate limiting if cooldown period has passed
-                delattr(self.__class__, '_rate_limited_until')
 
         try:
             logger.debug(f"Preparing GPT generation for {count} {mode}(s)")
@@ -112,13 +84,9 @@ class ButterTextGenerator:
             return text
         except Exception as e:
             error_msg = str(e)
-            if "rate_limit" in error_msg.lower() or "429" in error_msg:
-                # Set a class-level rate limit timeout (5 minutes)
-                self.__class__._rate_limited_until = time.time() + 300
-                logger.warning("Rate limited. Will retry after 5 minutes.")
-            elif "insufficient_quota" in error_msg:
-                logger.error("OpenAI API quota exceeded")
-                self.use_gpt = False  # Permanently disable GPT for quota issues
+            if "insufficient_quota" in error_msg or "429" in error_msg:
+                logger.error("OpenAI API quota exceeded or rate limited")
+                self.use_gpt = False  # Disable GPT for subsequent requests
             else:
                 logger.error(f"GPT generation error: {error_msg}")
             
