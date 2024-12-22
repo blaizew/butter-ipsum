@@ -48,9 +48,6 @@ Built with:
 - Bootstrap for responsive design
 - Replit's AI Agent
 
-## Feature Suggestions
-Have a feature idea? Let us know! You can [submit a feature request](https://github.com/your-repo/issues/new/choose).
-
 ## Contributing
 
 We welcome contributions! Please feel free to submit a Pull Request.
