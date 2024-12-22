@@ -106,6 +106,73 @@ body {
     height: 42px;
 }
 
+/* GPT Toggle and Tuning Parameters Styles */
+.form-check-input {
+    background-color: var(--butter-secondary);
+    border-color: var(--butter-accent);
+    width: 3rem;
+    height: 1.5rem;
+    margin-right: 1rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--butter-primary);
+    border-color: var(--butter-accent);
+}
+
+.form-check-label {
+    color: var(--butter-dark);
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+#tuningParams {
+    background-color: var(--cream);
+    border: 2px solid var(--butter-primary);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 8px rgba(139, 115, 85, 0.1);
+}
+
+#tuningParams h5 {
+    color: var(--butter-dark);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.form-range {
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--butter-secondary);
+}
+
+.form-range::-webkit-slider-thumb {
+    background: var(--butter-primary);
+    border: 2px solid var(--butter-accent);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-range::-webkit-slider-thumb:hover {
+    background: var(--butter-accent);
+    transform: scale(1.1);
+}
+
+.form-range::-webkit-slider-runnable-track {
+    background: linear-gradient(90deg, var(--butter-primary), var(--butter-accent));
+    border-radius: 4px;
+    height: 8px;
+}
+
+.form-label {
+    color: var(--butter-dark);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
 .form-control:focus {
     border-color: var(--butter-accent);
     box-shadow: 0 0 0 0.2rem rgba(255, 213, 79, 0.25);

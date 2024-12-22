@@ -19,7 +19,7 @@ def create_system_prompt(tuning_params=None):
     # Normalize parameters to 0-1 range for clearer instruction
     params = {k: v/10 for k, v in tuning_params.items()}
     
-    return f"""You are a specialized text generator that creates butter-themed placeholder text.
+    return f"""You are a specialized text generator that creates butter-themed lorem ipsum placeholder text.
 Your output should be creative, food-focused, and maintain a consistent butter theme throughout.
 Generate text that captures the essence of butter while being suitable for placeholder content.
 
