@@ -43,7 +43,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (data.error) {
-                showToast(data.error);
+                if (data.fallback_available) {
+                    // If fallback is available, show an option to retry without GPT
+                    const retry = confirm(data.error + "\n\nWould you like to try again without GPT?");
+                    if (retry) {
+                        document.getElementById('useGpt').checked = false;
+                        tuningParams.style.display = 'none';
+                        generateForm.dispatchEvent(new Event('submit'));
+                    }
+                } else {
+                    showToast(data.error);
+                }
                 return;
             }
             

@@ -16,15 +16,16 @@ def index():
 @app.route('/api/docs')
 def api_docs():
     return render_template('api.html')
+
 @app.route('/sheets')
 def sheets_docs():
     return render_template('google_sheets.html')
-
 
 @app.route('/generate', methods=['GET'])
 def generate_text():
     """Generate butter-themed text through web interface."""
     try:
+        # Parse and validate basic parameters
         count = int(request.args.get('count', 1))
         mode = request.args.get('mode', 'paragraph')
         use_gpt = request.args.get('use_gpt', '').lower() == 'true'
@@ -53,6 +54,15 @@ def generate_text():
         # Create a new generator instance with current settings
         generator = ButterTextGenerator(use_gpt=use_gpt, tuning_params=tuning_params)
         
+        # Check if GPT was requested but not available
+        if use_gpt and not generator.use_gpt:
+            logger.warning("GPT generation requested but not available")
+            return jsonify({
+                'text': None,
+                'error': 'GPT generation is currently unavailable. Please try again later or disable GPT.',
+                'fallback_available': True
+            }), 503
+        
         # Generate text based on mode
         if mode == 'paragraph':
             logger.debug(f"Generating {count} paragraphs (GPT: {use_gpt})")
@@ -64,7 +74,14 @@ def generate_text():
             logger.debug(f"Generating {count} words (GPT: {use_gpt})")
             text = generator.generate_words(count)
 
+        if text is None:
+            return jsonify({
+                'error': 'Failed to generate text',
+                'fallback_available': True
+            }), 500
+
         return jsonify({'text': text})
+        
     except ValueError as ve:
         logger.error(f"Invalid parameter value: {str(ve)}")
         return jsonify({'error': 'Invalid parameter value'}), 400
