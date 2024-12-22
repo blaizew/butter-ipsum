@@ -27,24 +27,47 @@ def generate_text():
     try:
         count = int(request.args.get('count', 1))
         mode = request.args.get('mode', 'paragraph')
+        use_gpt = request.args.get('use_gpt', '').lower() == 'true'
         
+        # Get tuning parameters
+        tuning_params = {
+            'playfulness': int(request.args.get('playfulness', 7)),
+            'humor': int(request.args.get('humor', 4)),
+            'emotion': int(request.args.get('emotion', 6)),
+            'poetic': int(request.args.get('poetic', 8)),
+            'metaphorical': int(request.args.get('metaphorical', 8)),
+            'technical': int(request.args.get('technical', 3))
+        }
+        
+        # Validate parameters
         if count < 1 or count > 10:
             return jsonify({'error': 'Count must be between 1 and 10'}), 400
             
         if mode not in ['paragraph', 'sentence', 'word']:
             return jsonify({'error': 'Invalid mode'}), 400
+            
+        for param, value in tuning_params.items():
+            if not isinstance(value, int) or value < 1 or value > 10:
+                return jsonify({'error': f'Invalid {param} value. Must be between 1 and 10'}), 400
 
+        # Create a new generator instance with current settings
+        generator = ButterTextGenerator(use_gpt=use_gpt, tuning_params=tuning_params)
+        
+        # Generate text based on mode
         if mode == 'paragraph':
-            logger.debug(f"Generating {count} paragraphs")
-            text = text_generator.generate_paragraphs(count)
+            logger.debug(f"Generating {count} paragraphs (GPT: {use_gpt})")
+            text = generator.generate_paragraphs(count)
         elif mode == 'sentence':
-            logger.debug(f"Generating {count} sentences")
-            text = text_generator.generate_sentences(count)
+            logger.debug(f"Generating {count} sentences (GPT: {use_gpt})")
+            text = generator.generate_sentences(count)
         else:
-            logger.debug(f"Generating {count} words")
-            text = text_generator.generate_words(count)
+            logger.debug(f"Generating {count} words (GPT: {use_gpt})")
+            text = generator.generate_words(count)
 
         return jsonify({'text': text})
+    except ValueError as ve:
+        logger.error(f"Invalid parameter value: {str(ve)}")
+        return jsonify({'error': 'Invalid parameter value'}), 400
     except Exception as e:
         logger.error(f"Error generating text: {str(e)}")
         return jsonify({'error': 'Failed to generate text'}), 500

@@ -3,15 +3,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const outputDiv = document.getElementById('output');
     const copyButton = document.getElementById('copyButton');
     const toast = document.getElementById('toast');
+    const useGptToggle = document.getElementById('useGpt');
+    const tuningParams = document.getElementById('tuningParams');
+
+    // Show/hide tuning parameters based on GPT toggle
+    useGptToggle.addEventListener('change', function() {
+        tuningParams.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Update slider labels when values change
+    const sliders = ['playfulness', 'humor', 'emotion', 'poetic', 'metaphorical', 'technical'];
+    sliders.forEach(param => {
+        const slider = document.getElementById(param);
+        const label = slider.previousElementSibling;
+        slider.addEventListener('input', function() {
+            label.textContent = label.textContent.replace(/\(\d+\)/, `(${this.value})`);
+        });
+    });
 
     generateForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
         const count = document.getElementById('count').value;
         const mode = document.getElementById('mode').value;
+        const useGpt = document.getElementById('useGpt').checked;
+        
+        // Build URL with parameters
+        let url = `/generate?count=${count}&mode=${mode}&use_gpt=${useGpt}`;
+        
+        // Add tuning parameters if GPT is enabled
+        if (useGpt) {
+            sliders.forEach(param => {
+                url += `&${param}=${document.getElementById(param).value}`;
+            });
+        }
         
         try {
-            const response = await fetch(`/generate?count=${count}&mode=${mode}`);
+            const response = await fetch(url);
             const data = await response.json();
             
             if (data.error) {
