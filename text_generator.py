@@ -25,31 +25,15 @@ class ButterTextGenerator:
                 if not api_key:
                     raise ValueError("OpenAI API key not found in environment variables")
                 
-                logger.debug("Attempting to initialize OpenAI client...")
+                logger.debug("Initializing OpenAI client...")
                 self.openai_client = OpenAI(api_key=api_key)
-                
-                # Validate API key with a minimal request
-                response = self.openai_client.chat.completions.create(
-                    model=self.model,
-                    messages=[{"role": "user", "content": "test"}],
-                    max_tokens=1
-                )
-                if response:
-                    logger.info("OpenAI client successfully initialized and tested")
+                logger.info("OpenAI client initialized successfully")
                 
             except ValueError as ve:
-                logger.error(str(ve))
+                logger.error(f"Configuration error: {str(ve)}")
                 self.use_gpt = False
             except Exception as e:
-                error_msg = str(e)
-                if "invalid_api_key" in error_msg.lower():
-                    logger.error("Invalid OpenAI API key provided")
-                elif "insufficient_quota" in error_msg.lower():
-                    logger.error("OpenAI API quota exceeded")
-                elif "rate_limit" in error_msg.lower():
-                    logger.error("OpenAI API rate limit exceeded")
-                else:
-                    logger.error(f"Error initializing OpenAI client: {error_msg}")
+                logger.error(f"Unexpected error initializing OpenAI client: {str(e)}")
                 self.use_gpt = False
         
         logger.debug(f"Initialized ButterTextGenerator with {len(self.patterns)} patterns")
@@ -60,7 +44,7 @@ class ButterTextGenerator:
     def generate_with_gpt(self, count, mode):
         """Generate text using GPT model"""
         if not self.openai_client:
-            logger.warning("OpenAI client not initialized, falling back to basic generation")
+            logger.warning("OpenAI client not initialized")
             return None
 
         try:
@@ -68,7 +52,7 @@ class ButterTextGenerator:
             system_prompt = create_system_prompt(self.tuning_params)
             user_prompt = create_user_prompt(count, mode)
             
-            logger.debug("Sending request to OpenAI API")
+            logger.debug(f"Sending request to OpenAI API using model {self.model}")
             response = self.openai_client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -80,17 +64,13 @@ class ButterTextGenerator:
             )
             
             text = response.choices[0].message.content
-            logger.debug(f"Successfully generated text using GPT: {len(text)} characters")
+            logger.info(f"Successfully generated text using GPT ({len(text)} chars)")
             return text
+            
         except Exception as e:
             error_msg = str(e)
-            if "insufficient_quota" in error_msg or "429" in error_msg:
-                logger.error("OpenAI API quota exceeded or rate limited")
-                self.use_gpt = False  # Disable GPT for subsequent requests
-            else:
-                logger.error(f"GPT generation error: {error_msg}")
-            
-            logger.warning("GPT generation failed, falling back to basic generation")
+            logger.error(f"Error during GPT text generation: {error_msg}")
+            # Don't disable GPT globally, just return None for this request
             return None
 
     def generate_sentence(self):
