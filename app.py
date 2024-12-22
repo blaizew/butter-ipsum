@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template, jsonify, request, send_file
+from flask import Flask, render_template, jsonify, request
 from text_generator import ButterTextGenerator
 
 # Configure logging
@@ -19,15 +19,6 @@ def api_docs():
 @app.route('/sheets')
 def sheets_docs():
     return render_template('google_sheets.html')
-@app.route('/sheets/script')
-def download_script():
-    """Download the Google Apps Script code."""
-    script_path = os.path.join(app.static_folder, 'google-apps-script', 'butteripsum.gs')
-    return send_file(script_path, 
-                    mimetype='text/plain',
-                    as_attachment=True,
-                    download_name='butteripsum.gs')
-
 
 
 @app.route('/generate', methods=['GET'])
@@ -36,16 +27,12 @@ def generate_text():
     try:
         count = int(request.args.get('count', 1))
         mode = request.args.get('mode', 'paragraph')
-        use_gpt = request.args.get('use_gpt', 'false').lower() == 'true'
         
         if count < 1 or count > 10:
             return jsonify({'error': 'Count must be between 1 and 10'}), 400
             
         if mode not in ['paragraph', 'sentence', 'word']:
             return jsonify({'error': 'Invalid mode'}), 400
-            
-        global text_generator
-        text_generator = ButterTextGenerator(use_gpt=use_gpt)
 
         if mode == 'paragraph':
             logger.debug(f"Generating {count} paragraphs")

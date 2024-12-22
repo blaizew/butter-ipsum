@@ -9,10 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const count = document.getElementById('count').value;
         const mode = document.getElementById('mode').value;
-        const useGpt = document.getElementById('useGpt').checked;
         
         try {
-            const response = await fetch(`/generate?count=${count}&mode=${mode}&use_gpt=${useGpt}`);
+            const response = await fetch(`/generate?count=${count}&mode=${mode}`);
             const data = await response.json();
             
             if (data.error) {
