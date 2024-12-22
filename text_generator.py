@@ -80,9 +80,7 @@ class ButterTextGenerator:
     def generate_sentence(self):
         """Generate a single sentence"""
         if self.use_gpt:
-            gpt_text = self.generate_with_gpt(1, "sentence")
-            if gpt_text:
-                return gpt_text
+            return self.generate_with_gpt(1, "sentence")
         
         try:
             pattern = random.choice(self.patterns)
@@ -106,9 +104,7 @@ class ButterTextGenerator:
     def generate_words(self, count):
         """Generate a list of words"""
         if self.use_gpt:
-            gpt_text = self.generate_with_gpt(count, "word")
-            if gpt_text:
-                return gpt_text
+            return self.generate_with_gpt(count, "word")
         
         words = []
         categories = list(self.words.keys())
@@ -120,19 +116,15 @@ class ButterTextGenerator:
     def generate_sentences(self, count):
         """Generate multiple sentences"""
         if self.use_gpt:
-            gpt_text = self.generate_with_gpt(count, "sentence")
-            if gpt_text:
-                return gpt_text
+            return self.generate_with_gpt(count, "sentence")
         
         return " ".join([self.generate_sentence() for _ in range(count)])
 
     def generate_paragraphs(self, count):
         """Generate multiple paragraphs"""
         if self.use_gpt:
-            gpt_text = self.generate_with_gpt(count, "paragraph")
-            if gpt_text:
-                return gpt_text
-        
+            return self.generate_with_gpt(count, "paragraph")
+            
         try:
             paragraphs = []
             for _ in range(count):
