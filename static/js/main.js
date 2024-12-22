@@ -6,18 +6,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const useGptToggle = document.getElementById('useGpt');
     const tuningParams = document.getElementById('tuningParams');
 
+    // Load saved GPT toggle state
+    const savedGptState = localStorage.getItem('useGpt');
+    if (savedGptState !== null) {
+        useGptToggle.checked = savedGptState === 'true';
+        tuningParams.style.display = useGptToggle.checked ? 'block' : 'none';
+    }
+
     // Show/hide tuning parameters based on GPT toggle
     useGptToggle.addEventListener('change', function() {
         tuningParams.style.display = this.checked ? 'block' : 'none';
+        localStorage.setItem('useGpt', this.checked);
     });
 
-    // Update slider labels when values change
+    // Update slider labels when values change and save to localStorage
     const sliders = ['playfulness', 'humor', 'emotion', 'poetic', 'metaphorical', 'technical'];
+    
+    // Load saved tuning parameters
+    sliders.forEach(param => {
+        const savedValue = localStorage.getItem(`gptTuning_${param}`);
+        if (savedValue !== null) {
+            const slider = document.getElementById(param);
+            slider.value = savedValue;
+            const label = slider.previousElementSibling;
+            label.textContent = label.textContent.replace(/\(\d+\)/, `(${savedValue})`);
+        }
+    });
+
+    // Add event listeners for sliders
     sliders.forEach(param => {
         const slider = document.getElementById(param);
         const label = slider.previousElementSibling;
         slider.addEventListener('input', function() {
-            label.textContent = label.textContent.replace(/\(\d+\)/, `(${this.value})`);
+            const newValue = this.value;
+            label.textContent = label.textContent.replace(/\(\d+\)/, `(${newValue})`);
+            localStorage.setItem(`gptTuning_${param}`, newValue);
         });
     });
 
