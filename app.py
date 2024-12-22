@@ -1,4 +1,5 @@
 import logging
+import time
 from flask import Flask, render_template, jsonify, request
 from text_generator import ButterTextGenerator
 
@@ -56,6 +57,16 @@ def generate_text():
         
         # Check if GPT was requested but not available
         if use_gpt and not generator.use_gpt:
+            if hasattr(generator.__class__, '_rate_limited_until'):
+                remaining_time = int(generator.__class__._rate_limited_until - time.time())
+                if remaining_time > 0:
+                    logger.warning(f"GPT generation rate limited for {remaining_time} seconds")
+                    return jsonify({
+                        'text': None,
+                        'error': f'GPT generation is temporarily unavailable due to rate limiting. Please try again in {remaining_time} seconds or disable GPT.',
+                        'fallback_available': True
+                    }), 503
+            
             logger.warning("GPT generation requested but not available")
             return jsonify({
                 'text': None,
