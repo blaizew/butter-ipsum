@@ -1,17 +1,21 @@
 import logging
 from flask import Flask, render_template, jsonify, request
 from text_generator import ButterTextGenerator
+from gpt_generator import GPTTextGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-text_generator = ButterTextGenerator()
+butter_generator = ButterTextGenerator()
+gpt_generator = GPTTextGenerator(api_key="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", instructions_file="gpt_instructions") #Added API Key and instructions file
+use_gpt = False #Added a toggle for GPT
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    global use_gpt #Access the global variable
+    return render_template('index.html', use_gpt=use_gpt) #Pass the toggle state to the template
 
 @app.route('/api/docs')
 def api_docs():
@@ -28,21 +32,21 @@ def generate_text():
         count = int(request.args.get('count', 1))
         mode = request.args.get('mode', 'paragraph')
         
-        if count < 1 or count > 10:
-            return jsonify({'error': 'Count must be between 1 and 10'}), 400
-            
-        if mode not in ['paragraph', 'sentence', 'word']:
-            return jsonify({'error': 'Invalid mode'}), 400
-
-        if mode == 'paragraph':
-            logger.debug(f"Generating {count} paragraphs")
-            text = text_generator.generate_paragraphs(count)
-        elif mode == 'sentence':
-            logger.debug(f"Generating {count} sentences")
-            text = text_generator.generate_sentences(count)
+        use_gpt = request.args.get('use_gpt', 'false').lower() == 'true'
+        
+        if use_gpt:
+            logger.debug(f"Using GPT to generate {count} {mode}(s)")
+            text = gpt_generator.generate_text(count, mode)
         else:
-            logger.debug(f"Generating {count} words")
-            text = text_generator.generate_words(count)
+            if mode == 'paragraph':
+                logger.debug(f"Generating {count} paragraphs")
+                text = butter_generator.generate_paragraphs(count)
+            elif mode == 'sentence':
+                logger.debug(f"Generating {count} sentences")
+                text = butter_generator.generate_sentences(count)
+            else:
+                logger.debug(f"Generating {count} words")
+                text = butter_generator.generate_words(count)
 
         return jsonify({'text': text})
     except Exception as e:
@@ -77,27 +81,21 @@ def api_generate_text():
         count = int(request.args.get('count', 1))
         mode = request.args.get('mode', 'paragraph')
         
-        if count < 1 or count > 10:
-            return jsonify({
-                'error': 'Invalid count parameter',
-                'message': 'Count must be between 1 and 10'
-            }), 400
-            
-        if mode not in ['paragraph', 'sentence', 'word']:
-            return jsonify({
-                'error': 'Invalid mode parameter',
-                'message': 'Mode must be one of: paragraph, sentence, word'
-            }), 400
-
-        if mode == 'paragraph':
-            logger.debug(f"API: Generating {count} paragraphs")
-            text = text_generator.generate_paragraphs(count)
-        elif mode == 'sentence':
-            logger.debug(f"API: Generating {count} sentences")
-            text = text_generator.generate_sentences(count)
+        use_gpt = request.args.get('use_gpt', 'false').lower() == 'true'
+        
+        if use_gpt:
+            logger.debug(f"API: Using GPT to generate {count} {mode}(s)")
+            text = gpt_generator.generate_text(count, mode)
         else:
-            logger.debug(f"API: Generating {count} words")
-            text = text_generator.generate_words(count)
+            if mode == 'paragraph':
+                logger.debug(f"API: Generating {count} paragraphs")
+                text = butter_generator.generate_paragraphs(count)
+            elif mode == 'sentence':
+                logger.debug(f"API: Generating {count} sentences")
+                text = butter_generator.generate_sentences(count)
+            else:
+                logger.debug(f"API: Generating {count} words")
+                text = butter_generator.generate_words(count)
 
         from datetime import datetime
         return jsonify({
