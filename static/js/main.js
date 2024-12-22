@@ -47,9 +47,15 @@ document.addEventListener('DOMContentLoaded', function() {
     generateForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        const submitButton = this.querySelector('button[type="submit"]');
         const count = document.getElementById('count').value;
         const mode = document.getElementById('mode').value;
         const useGpt = document.getElementById('useGpt').checked;
+        
+        // Show loading state if using GPT
+        if (useGpt) {
+            submitButton.classList.add('loading');
+        }
         
         // Build URL with parameters
         let url = `/generate?count=${count}&mode=${mode}&use_gpt=${useGpt}`;
@@ -86,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             showToast('Failed to generate text. Please try again.');
             console.error('Error:', error);
+        } finally {
+            // Hide loading state
+            submitButton.classList.remove('loading');
         }
     });
 
