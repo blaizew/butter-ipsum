@@ -63,24 +63,34 @@ def generate_text():
                 'fallback_available': True
             }), 503
         
-        # Generate text based on mode
-        if mode == 'paragraph':
-            logger.debug(f"Generating {count} paragraphs (GPT: {use_gpt})")
-            text = generator.generate_paragraphs(count)
-        elif mode == 'sentence':
-            logger.debug(f"Generating {count} sentences (GPT: {use_gpt})")
-            text = generator.generate_sentences(count)
-        else:
-            logger.debug(f"Generating {count} words (GPT: {use_gpt})")
-            text = generator.generate_words(count)
+        try:
+            # Generate text based on mode
+            if mode == 'paragraph':
+                logger.debug(f"Generating {count} paragraphs (GPT: {use_gpt})")
+                text = generator.generate_paragraphs(count)
+            elif mode == 'sentence':
+                logger.debug(f"Generating {count} sentences (GPT: {use_gpt})")
+                text = generator.generate_sentences(count)
+            else:
+                logger.debug(f"Generating {count} words (GPT: {use_gpt})")
+                text = generator.generate_words(count)
 
-        if text is None:
+            if text is None:
+                return jsonify({
+                    'error': 'Failed to generate text. Please try again.',
+                    'fallback_available': not use_gpt
+                }), 500
+
+            return jsonify({'text': text})
+            
+        except ValueError as ve:
+            # This catches the specific GPT-related errors we defined
+            error_message = str(ve)
+            logger.warning(f"GPT generation error: {error_message}")
             return jsonify({
-                'error': 'Failed to generate text',
-                'fallback_available': True
-            }), 500
-
-        return jsonify({'text': text})
+                'error': error_message,
+                'fallback_available': not use_gpt
+            }), 503  # Service Unavailable
         
     except ValueError as ve:
         logger.error(f"Invalid parameter value: {str(ve)}")

@@ -45,7 +45,7 @@ class ButterTextGenerator:
         """Generate text using GPT model"""
         if not self.openai_client:
             logger.warning("OpenAI client not initialized")
-            return None
+            raise ValueError("GPT generation is not available - OpenAI client not initialized")
 
         try:
             logger.debug(f"Preparing GPT generation for {count} {mode}(s)")
@@ -70,8 +70,12 @@ class ButterTextGenerator:
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Error during GPT text generation: {error_msg}")
-            # Don't disable GPT globally, just return None for this request
-            return None
+            if "insufficient_quota" in str(e):
+                raise ValueError("OpenAI API quota exceeded. Please try again later.")
+            elif "rate_limit" in str(e):
+                raise ValueError("OpenAI API rate limit reached. Please try again in a few moments.")
+            else:
+                raise ValueError(f"GPT generation failed: {str(e)}")
 
     def generate_sentence(self):
         """Generate a single sentence"""
