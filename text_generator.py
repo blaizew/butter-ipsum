@@ -16,25 +16,41 @@ class ButterTextGenerator:
         self.openai_client = None
         self.model = "gpt-4o-mini"  # the newest OpenAI model is "gpt-4o" which was released May 13, 2024
         
+        logger.debug(f"Initializing ButterTextGenerator (GPT: {use_gpt})")
+        
         # Initialize OpenAI client if using GPT
         if self.use_gpt:
-            api_key = os.environ.get("OPENAI_API_KEY")
-            if not api_key:
-                logger.error("OpenAI API key not found in environment variables")
+            try:
+                api_key = os.environ.get("OPENAI_API_KEY")
+                if not api_key:
+                    raise ValueError("OpenAI API key not found in environment variables")
+                
+                logger.debug("Attempting to initialize OpenAI client...")
+                self.openai_client = OpenAI(api_key=api_key)
+                
+                # Validate API key with a minimal request
+                response = self.openai_client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "user", "content": "test"}],
+                    max_tokens=1
+                )
+                if response:
+                    logger.info("OpenAI client successfully initialized and tested")
+                
+            except ValueError as ve:
+                logger.error(str(ve))
                 self.use_gpt = False
-            else:
-                try:
-                    self.openai_client = OpenAI(api_key=api_key)
-                    logger.debug("Successfully initialized OpenAI client")
-                except Exception as e:
-                    error_msg = str(e)
-                    if "invalid_api_key" in error_msg:
-                        logger.error("Invalid OpenAI API key provided")
-                    elif "insufficient_quota" in error_msg:
-                        logger.error("OpenAI API quota exceeded")
-                    else:
-                        logger.error(f"Error initializing OpenAI client: {error_msg}")
-                    self.use_gpt = False
+            except Exception as e:
+                error_msg = str(e)
+                if "invalid_api_key" in error_msg.lower():
+                    logger.error("Invalid OpenAI API key provided")
+                elif "insufficient_quota" in error_msg.lower():
+                    logger.error("OpenAI API quota exceeded")
+                elif "rate_limit" in error_msg.lower():
+                    logger.error("OpenAI API rate limit exceeded")
+                else:
+                    logger.error(f"Error initializing OpenAI client: {error_msg}")
+                self.use_gpt = False
         
         logger.debug(f"Initialized ButterTextGenerator with {len(self.patterns)} patterns")
         logger.debug(f"GPT generation: {'enabled' if self.use_gpt else 'disabled'}")
