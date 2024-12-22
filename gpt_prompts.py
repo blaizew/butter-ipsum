@@ -22,6 +22,7 @@ def create_system_prompt(tuning_params=None):
     return f"""You are a specialized text generator that creates butter-themed lorem ipsum placeholder text.
 Your output should be creative, food-focused, and maintain a consistent butter theme throughout.
 Generate text that captures the essence of butter while being suitable for placeholder content.
+Randomize sentence lengths (short, medium, long), and vary adjectives describing texture, aroma, and color.
 
 Style Guidelines (adjusted by parameters):
 - Playfulness: {params['playfulness']:.1f} - {'Very playful and whimsical' if params['playfulness'] > 0.7 else 'Moderately playful' if params['playfulness'] > 0.3 else 'More serious and straightforward'}
