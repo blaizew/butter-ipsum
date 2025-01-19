@@ -225,25 +225,26 @@ def trigger_twitter_post():
             }), 500
 
         # Then post to Twitter
-        success = twitter_bot.post_to_twitter()
+        success, message = twitter_bot.post_to_twitter()
         if success:
-            logger.info("Successfully posted to Twitter via /x_post endpoint")
+            logger.info(f"Successfully posted to Twitter via /x_post endpoint: {message}")
             return jsonify({
                 'status': 'success',
-                'message': 'Successfully posted to Twitter',
+                'message': message,
                 'generated_text': generated_text
             })
         else:
-            logger.error("Failed to post to Twitter via /x_post endpoint")
+            logger.error(f"Failed to post to Twitter via /x_post endpoint: {message}")
             return jsonify({
                 'error': 'Post failed',
-                'message': 'Failed to post to Twitter'
+                'message': message
             }), 500
     except Exception as e:
-        logger.error(f"Error posting to Twitter via /x_post endpoint: {str(e)}")
+        error_message = str(e)
+        logger.error(f"Error posting to Twitter via /x_post endpoint: {error_message}")
         return jsonify({
             'error': 'Internal server error',
-            'message': str(e)
+            'message': error_message
         }), 500
 
 if __name__ == '__main__':
