@@ -22,6 +22,9 @@ class ButterTwitterBot:
                 access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET']
             )
             logger.info("Twitter client initialized successfully")
+        except KeyError as e:
+            logger.error(f"Missing environment variable: {str(e)}")
+            raise
         except Exception as e:
             logger.error(f"Failed to initialize Twitter client: {str(e)}")
             raise
@@ -31,70 +34,44 @@ class ButterTwitterBot:
         try:
             # Generate one paragraph of butter-themed text
             text = self.text_generator.generate_paragraphs(1)
+            logger.debug(f"Generated text for daily post (length: {len(text)})")
             return text
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
             return None
 
-    def split_text_into_tweets(self, text, max_length=275):  # 275 to leave room for thread numbering
-        """Split long text into multiple tweets"""
-        words = text.split()
-        tweets = []
-        current_tweet = []
-        current_length = 0
-
-        for word in words:
-            # +1 for the space between words
-            if current_length + len(word) + 1 <= max_length:
-                current_tweet.append(word)
-                current_length += len(word) + 1
-            else:
-                tweets.append(' '.join(current_tweet))
-                current_tweet = [word]
-                current_length = len(word) + 1
-
-        if current_tweet:
-            tweets.append(' '.join(current_tweet))
-
-        # Add thread numbering
-        total = len(tweets)
-        if total > 1:
-            tweets = [f"{tweet} ({i+1}/{total})" for i, tweet in enumerate(tweets)]
-
-        return tweets
-
     def post_to_twitter(self):
-        """Post the generated text to Twitter using v2 API, creating a thread if needed"""
+        """Post the generated text to Twitter using v2 API"""
         try:
             text = self.generate_daily_post()
             if not text:
+                logger.error("Failed to generate text for tweet")
                 return False
 
-            # Split text into tweet-sized chunks
-            tweets = self.split_text_into_tweets(text)
+            logger.debug(f"Attempting to post tweet with length: {len(text)} characters")
+            logger.debug(f"Tweet text preview: {text[:100]}...")
 
-            # Post the first tweet
-            response = self.client.create_tweet(text=tweets[0])
-            if not response.data:
-                logger.error("Failed to post initial tweet")
-                return False
-
-            previous_tweet_id = response.data['id']
-            logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
-
-            # Post the rest of the thread if there are more tweets
-            for tweet in tweets[1:]:
-                response = self.client.create_tweet(
-                    text=tweet,
-                    in_reply_to_tweet_id=previous_tweet_id
-                )
-                if not response.data:
-                    logger.error("Failed to post thread reply")
+            try:
+                response = self.client.create_tweet(text=text)
+            except tweepy.TweepyException as te:
+                if '403' in str(te):
+                    logger.error(f"Twitter API 403 Forbidden error. Please verify API keys and permissions. Error: {str(te)}")
                     return False
-                previous_tweet_id = response.data['id']
-                logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
+                elif '401' in str(te):
+                    logger.error(f"Twitter API 401 Unauthorized error. Please verify API credentials. Error: {str(te)}")
+                    return False
+                else:
+                    logger.error(f"Twitter API error: {str(te)}")
+                    return False
 
+            if not response.data:
+                logger.error("Failed to post tweet: No response data")
+                return False
+
+            tweet_id = response.data['id']
+            logger.info(f"Successfully posted tweet with ID: {tweet_id}")
             return True
+
         except Exception as e:
             logger.error(f"Error posting to Twitter: {str(e)}")
             return False
