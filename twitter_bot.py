@@ -1,6 +1,7 @@
 import logging
 import tweepy
 import os
+import random # Added for random.randint
 from datetime import datetime
 from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -27,10 +28,11 @@ class ButterTwitterBot:
             raise
 
     def generate_daily_post(self):
-        """Generate a single paragraph of butter-themed text"""
+        """Generate random number of butter-themed sentences (1-8)"""
         try:
-            # Generate one paragraph of butter-themed text
-            text = self.text_generator.generate_paragraphs(1)
+            # Generate random number of sentences between 1 and 8
+            num_sentences = random.randint(1, 8)
+            text = self.text_generator.generate_sentences(num_sentences)
             return text
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
