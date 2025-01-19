@@ -10,4 +10,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "spacy>=3.8.3",
     "openai>=1.0.0",
+    "tweepy>=4.15.0",
+    "apscheduler>=3.11.0",
+    "pytz>=2024.2",
 ]

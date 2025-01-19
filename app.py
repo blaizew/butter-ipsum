@@ -1,6 +1,7 @@
 import logging
 from flask import Flask, render_template, jsonify, request
 from text_generator import ButterTextGenerator
+from twitter_bot import create_twitter_bot
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -8,6 +9,13 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 text_generator = ButterTextGenerator()
+
+# Initialize Twitter bot
+twitter_bot = create_twitter_bot()
+if twitter_bot:
+    logger.info("Twitter bot initialized and scheduled successfully")
+else:
+    logger.warning("Failed to initialize Twitter bot")
 
 @app.route('/')
 def index():
@@ -50,7 +58,7 @@ def generate_text():
         for param, value in tuning_params.items():
             if not isinstance(value, int) or value < 1 or value > 10:
                 return jsonify({'error': f'Invalid {param} value. Must be between 1 and 10'}), 400
-
+        
         # Create a new generator instance with current settings
         generator = ButterTextGenerator(use_gpt=use_gpt, tuning_params=tuning_params)
         
@@ -74,13 +82,13 @@ def generate_text():
             else:
                 logger.debug(f"Generating {count} words (GPT: {use_gpt})")
                 text = generator.generate_words(count)
-
+            
             if text is None:
                 return jsonify({
                     'error': 'Failed to generate text. Please try again.',
                     'fallback_available': not use_gpt
                 }), 500
-
+            
             return jsonify({'text': text})
             
         except ValueError as ve:
@@ -138,7 +146,7 @@ def api_generate_text():
                 'error': 'Invalid mode parameter',
                 'message': 'Mode must be one of: paragraph, sentence, word'
             }), 400
-
+        
         if mode == 'paragraph':
             logger.debug(f"API: Generating {count} paragraphs")
             text = text_generator.generate_paragraphs(count)
@@ -148,7 +156,7 @@ def api_generate_text():
         else:
             logger.debug(f"API: Generating {count} words")
             text = text_generator.generate_words(count)
-
+        
         from datetime import datetime
         return jsonify({
             'text': text,
