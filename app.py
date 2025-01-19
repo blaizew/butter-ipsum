@@ -216,12 +216,22 @@ def trigger_twitter_post():
         }), 503
 
     try:
+        # First generate the text
+        generated_text = twitter_bot.generate_daily_post()
+        if not generated_text:
+            return jsonify({
+                'error': 'Text generation failed',
+                'message': 'Failed to generate text for Twitter post'
+            }), 500
+
+        # Then post to Twitter
         success = twitter_bot.post_to_twitter()
         if success:
             logger.info("Successfully posted to Twitter via /x_post endpoint")
             return jsonify({
                 'status': 'success',
-                'message': 'Successfully posted to Twitter'
+                'message': 'Successfully posted to Twitter',
+                'generated_text': generated_text
             })
         else:
             logger.error("Failed to post to Twitter via /x_post endpoint")
