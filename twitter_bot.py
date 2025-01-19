@@ -1,7 +1,7 @@
 import logging
 import tweepy
 import os
-import random # Added for random.randint
+import random
 from datetime import datetime
 from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -13,6 +13,7 @@ class ButterTwitterBot:
     def __init__(self):
         self.text_generator = ButterTextGenerator()
         self.scheduler = BackgroundScheduler()
+        self.last_mention_id = None
 
         # Initialize Twitter client using v2 API
         try:
@@ -37,6 +38,51 @@ class ButterTwitterBot:
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
             return None
+
+    def generate_reply(self):
+        """Generate 1-2 sentences for reply"""
+        try:
+            num_sentences = random.randint(1, 2)
+            text = self.text_generator.generate_sentences(num_sentences)
+            return text
+        except Exception as e:
+            logger.error(f"Error generating reply: {str(e)}")
+            return None
+
+    def check_mentions(self):
+        """Check for new mentions and reply with butter ipsum"""
+        try:
+            # Get mentions timeline
+            mentions = self.client.get_users_mentions(
+                id=self.client.get_me()[0].id,
+                since_id=self.last_mention_id
+            )
+
+            if not mentions.data:
+                logger.debug("No new mentions found")
+                return
+
+            # Update last mention ID
+            self.last_mention_id = mentions.data[0].id
+
+            # Reply to each mention
+            for mention in mentions.data:
+                try:
+                    # Generate butter ipsum reply
+                    reply_text = self.generate_reply()
+                    if reply_text:
+                        # Post reply
+                        self.client.create_tweet(
+                            text=reply_text,
+                            in_reply_to_tweet_id=mention.id
+                        )
+                        logger.info(f"Replied to mention {mention.id}")
+                except Exception as e:
+                    logger.error(f"Error replying to mention {mention.id}: {str(e)}")
+                    continue
+
+        except Exception as e:
+            logger.error(f"Error checking mentions: {str(e)}")
 
     def split_text_into_tweets(self, text, max_length=275):  # 275 to leave room for thread numbering
         """Split long text into multiple tweets"""
@@ -102,12 +148,12 @@ class ButterTwitterBot:
             return False
 
     def schedule_daily_posts(self):
-        """Schedule daily posts at 9am PT"""
+        """Schedule daily posts at 9am PT and mention checks every 5 minutes"""
         try:
             # Configure scheduler to use PT timezone
             pt_timezone = timezone('US/Pacific')
 
-            # Schedule job to run at 9am PT
+            # Schedule daily post job to run at 9am PT
             self.scheduler.add_job(
                 self.post_to_twitter,
                 'cron',
@@ -116,12 +162,19 @@ class ButterTwitterBot:
                 timezone=pt_timezone
             )
 
+            # Schedule mention check job to run every 5 minutes
+            self.scheduler.add_job(
+                self.check_mentions,
+                'interval',
+                minutes=5
+            )
+
             # Start the scheduler
             self.scheduler.start()
-            logger.info("Scheduled daily Twitter posts successfully")
+            logger.info("Scheduled daily Twitter posts and mention checks successfully")
             return True
         except Exception as e:
-            logger.error(f"Error scheduling daily posts: {str(e)}")
+            logger.error(f"Error scheduling jobs: {str(e)}")
             return False
 
 def create_twitter_bot():
