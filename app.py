@@ -206,5 +206,35 @@ def test_twitter_post():
             'message': str(e)
         }), 500
 
+@app.route('/x_post')
+def trigger_twitter_post():
+    """Endpoint to manually trigger a Twitter post."""
+    if not twitter_bot:
+        return jsonify({
+            'error': 'Twitter bot not initialized',
+            'message': 'Twitter integration is not available'
+        }), 503
+
+    try:
+        success = twitter_bot.post_to_twitter()
+        if success:
+            logger.info("Successfully posted to Twitter via /x_post endpoint")
+            return jsonify({
+                'status': 'success',
+                'message': 'Successfully posted to Twitter'
+            })
+        else:
+            logger.error("Failed to post to Twitter via /x_post endpoint")
+            return jsonify({
+                'error': 'Post failed',
+                'message': 'Failed to post to Twitter'
+            }), 500
+    except Exception as e:
+        logger.error(f"Error posting to Twitter via /x_post endpoint: {str(e)}")
+        return jsonify({
+            'error': 'Internal server error',
+            'message': str(e)
+        }), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
