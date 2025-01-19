@@ -116,36 +116,44 @@ class ButterTwitterBot:
         try:
             text = self.generate_daily_post()
             if not text:
-                return False
+                logger.error("Failed to generate text for Twitter post")
+                return False, None
 
             # Split text into tweet-sized chunks
             tweets = self.split_text_into_tweets(text)
 
-            # Post the first tweet
-            response = self.client.create_tweet(text=tweets[0])
-            if not response.data:
-                logger.error("Failed to post initial tweet")
-                return False
-
-            previous_tweet_id = response.data['id']
-            logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
-
-            # Post the rest of the thread if there are more tweets
-            for tweet in tweets[1:]:
-                response = self.client.create_tweet(
-                    text=tweet,
-                    in_reply_to_tweet_id=previous_tweet_id
-                )
+            try:
+                # Post the first tweet
+                response = self.client.create_tweet(text=tweets[0])
                 if not response.data:
-                    logger.error("Failed to post thread reply")
-                    return False
-                previous_tweet_id = response.data['id']
-                logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
+                    logger.error("Failed to post initial tweet")
+                    return False, text  # Return the text even if posting failed
 
-            return True
+                previous_tweet_id = response.data['id']
+                logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
+
+                # Post the rest of the thread if there are more tweets
+                for tweet in tweets[1:]:
+                    response = self.client.create_tweet(
+                        text=tweet,
+                        in_reply_to_tweet_id=previous_tweet_id
+                    )
+                    if not response.data:
+                        logger.error("Failed to post thread reply")
+                        return False, text  # Return the text even if thread posting failed
+                    previous_tweet_id = response.data['id']
+                    logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
+
+                return True, text
+            except tweepy.TweepyException as e:
+                if "429" in str(e):
+                    logger.warning("Twitter rate limit reached. Please try again later.")
+                    return False, text  # Return the text even during rate limiting
+                raise
+
         except Exception as e:
             logger.error(f"Error posting to Twitter: {str(e)}")
-            return False
+            return False, None
 
     def schedule_daily_posts(self):
         """Schedule daily posts at 9am PT and mention checks every 5 minutes"""
