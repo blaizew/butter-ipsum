@@ -31,34 +31,70 @@ class ButterTwitterBot:
         try:
             # Generate one paragraph of butter-themed text
             text = self.text_generator.generate_paragraphs(1)
-
-            # Ensure the text fits Twitter's character limit (280 chars)
-            if len(text) > 280:
-                # If too long, generate sentences instead
-                text = self.text_generator.generate_sentences(2)
-                if len(text) > 280:
-                    # If still too long, generate a single sentence
-                    text = self.text_generator.generate_sentences(1)
-
             return text
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
             return None
 
+    def split_text_into_tweets(self, text, max_length=275):  # 275 to leave room for thread numbering
+        """Split long text into multiple tweets"""
+        words = text.split()
+        tweets = []
+        current_tweet = []
+        current_length = 0
+
+        for word in words:
+            # +1 for the space between words
+            if current_length + len(word) + 1 <= max_length:
+                current_tweet.append(word)
+                current_length += len(word) + 1
+            else:
+                tweets.append(' '.join(current_tweet))
+                current_tweet = [word]
+                current_length = len(word) + 1
+
+        if current_tweet:
+            tweets.append(' '.join(current_tweet))
+
+        # Add thread numbering
+        total = len(tweets)
+        if total > 1:
+            tweets = [f"{tweet} ({i+1}/{total})" for i, tweet in enumerate(tweets)]
+
+        return tweets
+
     def post_to_twitter(self):
-        """Post the generated text to Twitter using v2 API"""
+        """Post the generated text to Twitter using v2 API, creating a thread if needed"""
         try:
             text = self.generate_daily_post()
-            if text:
-                # Use v2 create_tweet endpoint
-                response = self.client.create_tweet(text=text)
-                if response.data:
-                    logger.info(f"Successfully posted tweet with ID: {response.data['id']}")
-                    return True
-                else:
-                    logger.error("Failed to post tweet: No response data")
+            if not text:
+                return False
+
+            # Split text into tweet-sized chunks
+            tweets = self.split_text_into_tweets(text)
+
+            # Post the first tweet
+            response = self.client.create_tweet(text=tweets[0])
+            if not response.data:
+                logger.error("Failed to post initial tweet")
+                return False
+
+            previous_tweet_id = response.data['id']
+            logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
+
+            # Post the rest of the thread if there are more tweets
+            for tweet in tweets[1:]:
+                response = self.client.create_tweet(
+                    text=tweet,
+                    in_reply_to_tweet_id=previous_tweet_id
+                )
+                if not response.data:
+                    logger.error("Failed to post thread reply")
                     return False
-            return False
+                previous_tweet_id = response.data['id']
+                logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
+
+            return True
         except Exception as e:
             logger.error(f"Error posting to Twitter: {str(e)}")
             return False
