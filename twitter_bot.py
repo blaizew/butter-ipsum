@@ -2,6 +2,7 @@ import logging
 import tweepy
 import os
 import random
+import time # Added import statement
 from datetime import datetime
 from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -77,12 +78,20 @@ class ButterTwitterBot:
                             in_reply_to_tweet_id=mention.id
                         )
                         logger.info(f"Replied to mention {mention.id}")
-                except Exception as e:
+                        # Add a small delay between replies to avoid rate limits
+                        time.sleep(2)
+                except tweepy.TweepyException as e:
+                    if "429" in str(e):
+                        logger.warning(f"Rate limit reached while replying to mention {mention.id}")
+                        return  # Stop processing more mentions if we hit rate limit
                     logger.error(f"Error replying to mention {mention.id}: {str(e)}")
                     continue
 
-        except Exception as e:
-            logger.error(f"Error checking mentions: {str(e)}")
+        except tweepy.TweepyException as e:
+            if "429" in str(e):
+                logger.warning("Rate limit reached while checking mentions")
+            else:
+                logger.error(f"Error checking mentions: {str(e)}")
 
     def split_text_into_tweets(self, text, max_length=275):  # 275 to leave room for thread numbering
         """Split long text into multiple tweets"""
@@ -156,7 +165,7 @@ class ButterTwitterBot:
             return False, None
 
     def schedule_daily_posts(self):
-        """Schedule daily posts at 9am PT and mention checks every 5 minutes"""
+        """Schedule daily posts at 9am PT and mention checks every 30 minutes"""
         try:
             # Configure scheduler to use PT timezone
             pt_timezone = timezone('US/Pacific')
@@ -170,11 +179,11 @@ class ButterTwitterBot:
                 timezone=pt_timezone
             )
 
-            # Schedule mention check job to run every 5 minutes
+            # Schedule mention check job to run every 30 minutes instead of 5
             self.scheduler.add_job(
                 self.check_mentions,
                 'interval',
-                minutes=5
+                minutes=30  # Changed from 5 to 30 minutes
             )
 
             # Start the scheduler
