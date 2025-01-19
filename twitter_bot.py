@@ -12,18 +12,15 @@ class ButterTwitterBot:
     def __init__(self):
         self.text_generator = ButterTextGenerator()
         self.scheduler = BackgroundScheduler()
-        
-        # Initialize Twitter client
+
+        # Initialize Twitter client using v2 API
         try:
-            auth = tweepy.OAuthHandler(
-                os.environ['TWITTER_API_KEY'],
-                os.environ['TWITTER_API_SECRET']
+            self.client = tweepy.Client(
+                consumer_key=os.environ['TWITTER_API_KEY'],
+                consumer_secret=os.environ['TWITTER_API_SECRET'],
+                access_token=os.environ['TWITTER_ACCESS_TOKEN'],
+                access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET']
             )
-            auth.set_access_token(
-                os.environ['TWITTER_ACCESS_TOKEN'],
-                os.environ['TWITTER_ACCESS_TOKEN_SECRET']
-            )
-            self.client = tweepy.API(auth)
             logger.info("Twitter client initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Twitter client: {str(e)}")
@@ -34,7 +31,7 @@ class ButterTwitterBot:
         try:
             # Generate one paragraph of butter-themed text
             text = self.text_generator.generate_paragraphs(1)
-            
+
             # Ensure the text fits Twitter's character limit (280 chars)
             if len(text) > 280:
                 # If too long, generate sentences instead
@@ -42,20 +39,25 @@ class ButterTwitterBot:
                 if len(text) > 280:
                     # If still too long, generate a single sentence
                     text = self.text_generator.generate_sentences(1)
-            
+
             return text
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
             return None
 
     def post_to_twitter(self):
-        """Post the generated text to Twitter"""
+        """Post the generated text to Twitter using v2 API"""
         try:
             text = self.generate_daily_post()
             if text:
-                self.client.update_status(text)
-                logger.info("Successfully posted to Twitter")
-                return True
+                # Use v2 create_tweet endpoint
+                response = self.client.create_tweet(text=text)
+                if response.data:
+                    logger.info(f"Successfully posted tweet with ID: {response.data['id']}")
+                    return True
+                else:
+                    logger.error("Failed to post tweet: No response data")
+                    return False
             return False
         except Exception as e:
             logger.error(f"Error posting to Twitter: {str(e)}")
@@ -66,7 +68,7 @@ class ButterTwitterBot:
         try:
             # Configure scheduler to use PT timezone
             pt_timezone = timezone('US/Pacific')
-            
+
             # Schedule job to run at 9am PT
             self.scheduler.add_job(
                 self.post_to_twitter,
@@ -75,7 +77,7 @@ class ButterTwitterBot:
                 minute=0,
                 timezone=pt_timezone
             )
-            
+
             # Start the scheduler
             self.scheduler.start()
             logger.info("Scheduled daily Twitter posts successfully")
