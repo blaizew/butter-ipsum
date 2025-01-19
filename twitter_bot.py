@@ -1,8 +1,7 @@
 import logging
 import tweepy
 import os
-import random
-import time # Added import statement
+import random # Added for random.randint
 from datetime import datetime
 from pytz import timezone
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -14,7 +13,6 @@ class ButterTwitterBot:
     def __init__(self):
         self.text_generator = ButterTextGenerator()
         self.scheduler = BackgroundScheduler()
-        self.last_mention_id = None
 
         # Initialize Twitter client using v2 API
         try:
@@ -39,59 +37,6 @@ class ButterTwitterBot:
         except Exception as e:
             logger.error(f"Error generating daily post: {str(e)}")
             return None
-
-    def generate_reply(self):
-        """Generate 1-2 sentences for reply"""
-        try:
-            num_sentences = random.randint(1, 2)
-            text = self.text_generator.generate_sentences(num_sentences)
-            return text
-        except Exception as e:
-            logger.error(f"Error generating reply: {str(e)}")
-            return None
-
-    def check_mentions(self):
-        """Check for new mentions and reply with butter ipsum"""
-        try:
-            # Get mentions timeline
-            mentions = self.client.get_users_mentions(
-                id=self.client.get_me()[0].id,
-                since_id=self.last_mention_id
-            )
-
-            if not mentions.data:
-                logger.debug("No new mentions found")
-                return
-
-            # Update last mention ID
-            self.last_mention_id = mentions.data[0].id
-
-            # Reply to each mention
-            for mention in mentions.data:
-                try:
-                    # Generate butter ipsum reply
-                    reply_text = self.generate_reply()
-                    if reply_text:
-                        # Post reply
-                        self.client.create_tweet(
-                            text=reply_text,
-                            in_reply_to_tweet_id=mention.id
-                        )
-                        logger.info(f"Replied to mention {mention.id}")
-                        # Add a small delay between replies to avoid rate limits
-                        time.sleep(2)
-                except tweepy.TweepyException as e:
-                    if "429" in str(e):
-                        logger.warning(f"Rate limit reached while replying to mention {mention.id}")
-                        return  # Stop processing more mentions if we hit rate limit
-                    logger.error(f"Error replying to mention {mention.id}: {str(e)}")
-                    continue
-
-        except tweepy.TweepyException as e:
-            if "429" in str(e):
-                logger.warning("Rate limit reached while checking mentions")
-            else:
-                logger.error(f"Error checking mentions: {str(e)}")
 
     def split_text_into_tweets(self, text, max_length=275):  # 275 to leave room for thread numbering
         """Split long text into multiple tweets"""
@@ -125,52 +70,44 @@ class ButterTwitterBot:
         try:
             text = self.generate_daily_post()
             if not text:
-                logger.error("Failed to generate text for Twitter post")
-                return False, None
+                return False
 
             # Split text into tweet-sized chunks
             tweets = self.split_text_into_tweets(text)
 
-            try:
-                # Post the first tweet
-                response = self.client.create_tweet(text=tweets[0])
+            # Post the first tweet
+            response = self.client.create_tweet(text=tweets[0])
+            if not response.data:
+                logger.error("Failed to post initial tweet")
+                return False
+
+            previous_tweet_id = response.data['id']
+            logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
+
+            # Post the rest of the thread if there are more tweets
+            for tweet in tweets[1:]:
+                response = self.client.create_tweet(
+                    text=tweet,
+                    in_reply_to_tweet_id=previous_tweet_id
+                )
                 if not response.data:
-                    logger.error("Failed to post initial tweet")
-                    return False, text  # Return the text even if posting failed
-
+                    logger.error("Failed to post thread reply")
+                    return False
                 previous_tweet_id = response.data['id']
-                logger.info(f"Posted initial tweet with ID: {previous_tweet_id}")
+                logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
 
-                # Post the rest of the thread if there are more tweets
-                for tweet in tweets[1:]:
-                    response = self.client.create_tweet(
-                        text=tweet,
-                        in_reply_to_tweet_id=previous_tweet_id
-                    )
-                    if not response.data:
-                        logger.error("Failed to post thread reply")
-                        return False, text  # Return the text even if thread posting failed
-                    previous_tweet_id = response.data['id']
-                    logger.info(f"Posted thread reply with ID: {previous_tweet_id}")
-
-                return True, text
-            except tweepy.TweepyException as e:
-                if "429" in str(e):
-                    logger.warning("Twitter rate limit reached. Please try again later.")
-                    return False, text  # Return the text even during rate limiting
-                raise
-
+            return True
         except Exception as e:
             logger.error(f"Error posting to Twitter: {str(e)}")
-            return False, None
+            return False
 
     def schedule_daily_posts(self):
-        """Schedule daily posts at 9am PT and mention checks every 30 minutes"""
+        """Schedule daily posts at 9am PT"""
         try:
             # Configure scheduler to use PT timezone
             pt_timezone = timezone('US/Pacific')
 
-            # Schedule daily post job to run at 9am PT
+            # Schedule job to run at 9am PT
             self.scheduler.add_job(
                 self.post_to_twitter,
                 'cron',
@@ -179,19 +116,12 @@ class ButterTwitterBot:
                 timezone=pt_timezone
             )
 
-            # Schedule mention check job to run every 30 minutes instead of 5
-            self.scheduler.add_job(
-                self.check_mentions,
-                'interval',
-                minutes=30  # Changed from 5 to 30 minutes
-            )
-
             # Start the scheduler
             self.scheduler.start()
-            logger.info("Scheduled daily Twitter posts and mention checks successfully")
+            logger.info("Scheduled daily Twitter posts successfully")
             return True
         except Exception as e:
-            logger.error(f"Error scheduling jobs: {str(e)}")
+            logger.error(f"Error scheduling daily posts: {str(e)}")
             return False
 
 def create_twitter_bot():

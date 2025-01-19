@@ -216,29 +216,28 @@ def trigger_twitter_post():
         }), 503
 
     try:
-        # Post to Twitter and get both the success status and the generated text
-        success, generated_text = twitter_bot.post_to_twitter()
-
-        if generated_text:
-            if success:
-                logger.info("Successfully posted to Twitter via /x_post endpoint")
-                return jsonify({
-                    'status': 'success',
-                    'message': 'Successfully posted to Twitter',
-                    'generated_text': generated_text
-                })
-            else:
-                logger.warning("Generated text but failed to post to Twitter")
-                return jsonify({
-                    'error': 'Post failed',
-                    'message': 'Failed to post to Twitter (possibly rate limited). Generated text is still available.',
-                    'generated_text': generated_text
-                }), 429  # Rate limit status code
-        else:
-            logger.error("Failed to generate text for Twitter post")
+        # First generate the text
+        generated_text = twitter_bot.generate_daily_post()
+        if not generated_text:
             return jsonify({
-                'error': 'Generation failed',
+                'error': 'Text generation failed',
                 'message': 'Failed to generate text for Twitter post'
+            }), 500
+
+        # Then post to Twitter
+        success = twitter_bot.post_to_twitter()
+        if success:
+            logger.info("Successfully posted to Twitter via /x_post endpoint")
+            return jsonify({
+                'status': 'success',
+                'message': 'Successfully posted to Twitter',
+                'generated_text': generated_text
+            })
+        else:
+            logger.error("Failed to post to Twitter via /x_post endpoint")
+            return jsonify({
+                'error': 'Post failed',
+                'message': 'Failed to post to Twitter'
             }), 500
     except Exception as e:
         logger.error(f"Error posting to Twitter via /x_post endpoint: {str(e)}")
